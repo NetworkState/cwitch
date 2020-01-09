@@ -1,0 +1,1263 @@
+﻿// Copyright (C) 2020 Network State.
+// All rights reserved.
+// Released under 'Source Available License'
+#define STYLE_FLAG_FONT_FAMILY_IMPORTANT              0x0001`
+#define STYLE_FLAG_FONT_SIZE_IMPORTANT                0x0002
+#define STYLE_FLAG_FONT_WEIGHT_IMPORTANT              0x0004
+#define STYLE_FLAG_FONT_STYLE_IMPORTANT               0x0008
+
+#define STYLE_FLAG_BACKGROUND_COLOR_IMPORTANT         0x0010
+#define STYLE_FLAG_FOREGROUND_COLOR_IMPORTANT         0x0020
+#define STYLE_FLAG_TEXT_ALIGNMENT_IMPORTANT           0x0040
+#define STYLE_FLAG_TEXT_INDENT_IMPORTANT              0x0080
+
+#define STYLE_FLAG_WIDTH_IMPORTANT                    0x0100
+
+#define DEFAULT_STYLE_ELEMENTS  8
+
+enum CSS_SCALE : UINT8
+{
+	CSS_SCALE_INVALID,
+	CSS_SCALE_PIXEL,
+	CSS_SCALE_EM,
+	CSS_SCALE_PERCENT,
+	CSS_SCALE_POINT,
+	CSS_SCALE_GRID,
+	CSS_SCALE_COLOR,
+	CSS_SCALE_NAME,
+	CSS_SCALE_DISPLAY,
+	CSS_SCALE_AUTO,
+	CSS_SCALE_INHERIT,
+};
+
+enum CSS_PROPERTY_NAME : UINT8
+{
+	CSS_PROPERTY_INVALID,
+	CSS_PROPERTY_FONT,
+	CSS_PROPERTY_FONT_FAMILY,
+	CSS_PROPERTY_FONT_SIZE,
+	CSS_PROPERTY_FONT_WEIGHT,
+	CSS_PROPERTY_FONT_VARIANT,
+	CSS_PROPERTY_FONT_STYLE,
+	CSS_PROPERTY_DISPLAY,
+	CSS_PROPERTY_COLOR,
+	CSS_PROPERTY_BACKGROUND_COLOR,
+	CSS_PROPERTY_BACKGROUND,
+	CSS_PROPERTY_BACKGROUND_IMAGE,
+	CSS_PROPERTY_WIDTH,
+	CSS_PROPERTY_HEIGHT,
+	CSS_PROPERTY_FLOAT,
+	CSS_PROPERTY_CLEAR,
+	CSS_PROPERTY_PADDING,
+	CSS_PROPERTY_PADDING_LEFT,
+	CSS_PROPERTY_PADDING_RIGHT,
+	CSS_PROPERTY_PADDING_TOP,
+	CSS_PROPERTY_PADDING_BOTTOM,
+	CSS_PROPERTY_MARGIN,
+	CSS_PROPERTY_MARGIN_LEFT,
+	CSS_PROPERTY_MARGIN_RIGHT,
+	CSS_PROPERTY_MARGIN_TOP,
+	CSS_PROPERTY_MARGIN_BOTTOM,
+	CSS_PROPERTY_BORDER,
+	CSS_PROPERTY_BORDER_TOP,
+	CSS_PROPERTY_BORDER_BOTTOM,
+	CSS_PROPERTY_BORDER_LEFT,
+	CSS_PROPERTY_BORDER_RIGHT,
+	CSS_PROPERTY_BORDER_TOP_COLOR,
+	CSS_PROPERTY_BORDER_BOTTOM_COLOR,
+	CSS_PROPERTY_BORDER_LEFT_COLOR,
+	CSS_PROPERTY_BORDER_RIGHT_COLOR,
+	CSS_PROPERTY_BORDER_COLOR,
+	CSS_PROPERTY_BORDER_TOP_STYLE,
+	CSS_PROPERTY_BORDER_BOTTOM_STYLE,
+	CSS_PROPERTY_BORDER_LEFT_STYLE,
+	CSS_PROPERTY_BORDER_RIGHT_STYLE,
+	CSS_PROPERTY_BORDER_STYLE,
+	CSS_PROPERTY_BORDER_TOP_WIDTH,
+	CSS_PROPERTY_BORDER_BOTTOM_WIDTH,
+	CSS_PROPERTY_BORDER_LEFT_WIDTH,
+	CSS_PROPERTY_BORDER_RIGHT_WIDTH,
+	CSS_PROPERTY_BORDER_WIDTH,
+	CSS_PROPERTY_TEXT_DECORATION,
+	CSS_PROPERTY_TEXT_ALIGN,
+	CSS_PROPERTY_TEXT_INDENT,
+	CSS_PROPERTY_TEXT_TRANSFORM,
+	CSS_PROPERTY_LINE_HEIGHT,
+	CSS_PROPERTY_FONT_SIZE_ADJUST,
+	CSS_PROPERTY_FONT_STRETCH,
+	CSS_PROPERTY_BORDER_IMAGE,
+	CSS_PROPERTY_BORDER_COLLAPSE,
+	CSS_PROPERTY_BORDER_SPACING,
+	CSS_PROPERTY_VERTICAL_ALIGN,
+	CSS_PROPERTY_OVERFLOW,
+	CSS_PROPERTY_LIST_STYLE_IMAGE,
+	CSS_PROPERTY_LIST_STYLE_POSITION,
+	CSS_PROPERTY_LIST_STYLE_TYPE,
+	CSS_PROPERTY_WHITE_SPACE,
+	CSS_PROPERTY_BACKGROUND_ATTACHMENT,
+	CSS_PROPERTY_BACKGROUND_POSITION,
+	CSS_PROPERTY_BACKGROUND_REPEAT,
+	CSS_PROPERTY_CURSOR,
+	CSS_PROPERTY_LETTER_SPACING,
+	CSS_PROPERTY_OPACITY,
+	CSS_PROPERTY_Z_INDEX,
+	CSS_PROPERTY_RESIZE,
+	CSS_PROPERTY_ZOOM,
+	CSS_PROPERTY_TEXT_SHADOW,
+	CSS_PROPERTY_CLIP,
+	CSS_PROPERTY_WORD_SPACING,
+	CSS_PROPERTY_TEXT_OVERFLOW,
+	CSS_PROPERTY_FILTER,
+	CSS_PROPERTY_LIST_STYLE,
+	CSS_PROPERTY_WORD_WRAP,
+	CSS_PROPERTY_TABLE_LAYOUT,
+	CSS_PROPERTY_VISIBILITY,
+	CSS_PROPERTY_POSITION,
+	CSS_PROPERTY_TOP,
+	CSS_PROPERTY_BOTTOM,
+	CSS_PROPERTY_LEFT,
+	CSS_PROPERTY_RIGHT,
+	CSS_PROPERTY_MIN_HEIGHT,
+	CSS_PROPERTY_MIN_WIDTH,
+	CSS_PROPERTY_MAX_HEIGHT,
+	CSS_PROPERTY_MAX_WIDTH,
+	CSS_PROPERTY_MAX_VALUE,
+};
+
+enum CSS_FLAGS : UINT8
+{
+	CSS_FLAG_NONE = 0,
+	CSS_FLAG_IMPORTANT = 0x01,
+	//CSS_FLAG_IGNORE_VALUE = 0x02,
+};
+
+DEFINE_ENUM_FLAG_OPERATORS(CSS_FLAGS);
+
+struct CSS_PROPERTY
+{
+	float value = -1.f;
+	CSS_SCALE scale = CSS_SCALE_INVALID;
+	CSS_PROPERTY_NAME name = CSS_PROPERTY_INVALID;
+	CSS_FLAGS flags = CSS_FLAG_NONE;
+
+	explicit operator bool() const { return IsValidRef(*this) && scale != CSS_SCALE_INVALID; }
+};
+
+using CSS_STREAM = STREAM_BUILDER<CSS_PROPERTY, SERVICE_STACK, 8>;
+enum CSS_DISPLAY : UINT8
+{
+	DISPLAY_INVALID,
+	DISPLAY_NONE,
+	DISPLAY_BLOCK,
+	DISPLAY_INLINE,
+	DISPLAY_LIST_ITEM,
+	DISPLAY_INLINE_BLOCK,
+	DISPLAY_TABLE,
+	DISPLAY_GRID,
+	DISPLAY_INLINE_TABLE,
+	DISPLAY_TABLE_ROW_GROUP,
+	DISPLAY_TABLE_HEADER_GROUP,
+	DISPLAY_TABLE_FOOTER_GROUP,
+	DISPLAY_TABLE_ROW,
+	DISPLAY_TABLE_COLUMN_GROUP,
+	DISPLAY_TABLE_COLUMN,
+	DISPLAY_TABLE_CELL,
+	DISPLAY_TABLE_CAPTION,
+	DISPLAY_INHERIT,
+};
+
+enum FONT_FAMILY : UINT8
+{
+	FONT_FAMILY_SANS_SERIF,
+	FONT_FAMILY_SERIF,
+	FONT_FAMILY_MONOSPACE,
+	FONT_FAMILY_FANTASY,
+	FONT_FAMILY_CURSIVE,
+};
+
+enum TEXT_ALIGNMENT : UINT8
+{
+	TEXT_ALIGNMENT_LEFT,
+	TEXT_ALIGNMENT_RIGHT,
+	TEXT_ALIGNMENT_CENTER,
+	TEXT_ALIGNMENT_JUSTIFY,
+	TEXT_ALIGNMENT_INHERIT,
+};
+
+enum TEXT_DECORATION : UINT8
+{
+	TEXT_DECORATION_NONE,
+	TEXT_DECORATION_UNDERLINE,
+	TEXT_DECORATION_OVERLINE,
+	TEXT_DECORATION_LINE_THROUGH,
+	TEXT_DECORATION_BLINK,
+	TEXT_DECORATION_INHERIT,
+};
+
+enum TEXT_TRANSFORM : UINT8
+{
+
+	TEXT_TRANSFORM_CAPITALIZE,
+	TEXT_TRANSFORM_UPPERCASE,
+	TEXT_TRANSFORM_LOWERCASE,
+	TEXT_TRANSFORM_NONE,
+	TEXT_TRANSFORM_INHERIT,
+};
+
+enum FONT_WEIGHT : UINT8
+{
+	FONT_WEIGHT_NORMAL,
+	FONT_WEIGHT_BOLD,
+	FONT_WEIGHT_BOLDER,
+	FONT_WEIGHT_LIGHTER,
+	FONT_WEIGHT_100,
+	FONT_WEIGHT_200,
+	FONT_WEIGHT_300,
+	FONT_WEIGHT_400,
+	FONT_WEIGHT_500,
+	FONT_WEIGHT_600,
+	FONT_WEIGHT_700,
+	FONT_WEIGHT_800,
+	FONT_WEIGHT_900,
+};
+
+enum FONT_STYLE : UINT8
+{
+	FONT_STYLE_ITALIC,
+	FONT_STYLE_OBLIQUE,
+	FONT_STYLE_NORMAL,
+	FONT_STYLE_INHERIT,
+};
+
+enum FONT_SIZE : UINT8
+{
+	FONT_SIZE_XX_SMALL = 8,
+	FONT_SIZE_X_SMALL = 10,
+	FONT_SIZE_SMALL = 12,
+	FONT_SIZE_MEDIUM = 14,
+	FONT_SIZE_LARGE = 18,
+	FONT_SIZE_X_LARGE = 24,
+	FONT_SIZE_XX_LARGE = 36,
+};
+
+struct COLOR_INFO
+{
+	TOKEN name;
+	//RGB rgb;
+	HSV hsv;
+
+	COLOR_INFO() {}
+	COLOR_INFO(TOKEN nameArg, HSV hsvArg) : name(nameArg), hsv(hsvArg) {}
+};
+
+constexpr USTRING RgbColors [] = {
+	"rgb(0, 0, 0)", "rgb(255, 255, 255)", "rgb(221, 221, 221)", "rgb(76, 76, 76)", "rgb(102, 102, 102)",
+	"rgb(204, 204, 204)", "rgb(68, 68, 68)", "rgb(246, 246, 246)", "rgb(51, 51, 51)", "rgb(153, 153, 153)",
+	"rgb(0, 51, 102)", "rgb(204, 0, 0)", "rgb(153, 0, 0)", "rgb(242, 242, 242)", "rgb(204, 102, 0)", "rgb(51, 51, 204)",
+	"rgb(204, 51, 51)", "rgb(204, 102, 102)", "rgb(226, 226, 226)", "rgb(96, 96, 96)", "rgb(0, 0, 204)",
+	"rgb(198, 198, 198)", "rgb(215, 223, 255", "rgb(255, 219, 215)", "rgb(238, 238, 238)", "rgb(51, 51, 204)",
+	"rgb(211, 0, 21)", "rgb(170, 170, 170)", "rgb(85, 85, 85)", "rgb(42, 42, 42)", "rgb(0, 112, 159)", "rgb(0, 112, 159)",
+	"rgb(3, 105, 122)", "rgb(51, 144, 177)", "rgb(112, 112, 112)", "rgb(219, 219, 219)", "rgb(248, 248, 248)", "rgb(194, 194, 194)",
+	"rgb(139, 139, 139)", "rgb(147, 147, 147)", "rgb(255, 255, 198)", "rgb(219, 113, 0)", "rgb(229, 229, 229)", "rgb(44, 114, 156)",
+	"rgb(51, 144, 177)", "rgb(3, 105, 122)", "rgb(69, 69, 69)", "rgb(0, 204, 255)", "rgb(19, 100, 196)", "rgb(230, 106, 56)",
+	"rgb(93, 93, 93", "rgb(187, 189, 191)", "rgb(30, 117, 187)", "rgb(40, 40, 40)", "rgb(0, 188, 242)", "rgb(0, 24, 143)",
+	"rgb(237, 237, 240)",
+};
+
+/*
+{{ MAROON, "#800000"}, { RED, "#ff0000},{ ORANGE, "#ffA500},{ YELLOW, "#ffff00},{ OLIVE, "#808000},{ PURPLE, "#800080},
+{ FUCHSIA, "#ff00ff},{ WHITE, "#ffffff},{ LIME, "#00ff00},{ GREEN, "#008000},{ NAVY, "#000080},{ BLUE, "#0000ff},
+{ AQUA, "#00ffff},{ TEAL, "#008080},{ BLACK, "#000000},{ SILVER, "#c0c0c0},{ GRAY, "#808080}};
+*/
+//
+//constexpr struct {
+//	TOKEN name; USTRING color;
+//} StandardColors [] = { { STYLE_maroon, "#800000"}, { STYLE_red, "#ff0000"},{ STYLE_orange, "#ffA500" }, { STYLE_yellow, "#ffff00"},{ STYLE_olive, "#808000" }, { STYLE_purple, "#800080"},
+//{ STYLE_fuchsia, "#ff00ff"},{ STYLE_white, "#ffffff"}, { STYLE_lime, "#00ff00"},{ STYLE_green, "#008000" }, { STYLE_navy, "#000080"},{ STYLE_blue, "#0000ff" },
+//{ STYLE_aqua, "#00ffff"}, { STYLE_teal, "#008080" }, { STYLE_black, "#000000" }, { STYLE_silver, "#c0c0c0" }, { STYLE_gray, "#808080" } };
+
+
+constexpr struct {
+	TOKEN name; USTRING color;
+} StandardColors[] = {
+	{STYLE_aliceblue, "#F0F8FF"},
+	{STYLE_antiquewhite, "#FAEBD7"},
+	{STYLE_aqua, "#00FFFF"},
+	{STYLE_aquamarine, "#7FFFD4"},
+	{STYLE_azure, "#F0FFFF"},
+	{STYLE_beige, "#F5F5DC"},
+	{STYLE_bisque, "#FFE4C4"},
+	{STYLE_black, "#000000"},
+	{STYLE_blanchedalmond, "#FFEBCD"},
+	{STYLE_blue, "#0000FF"},
+	{STYLE_blueviolet, "#8A2BE2"},
+	{STYLE_brown, "#A52A2A"},
+	{STYLE_burlywood, "#DEB887"},
+	{STYLE_cadetblue, "#5F9EA0"},
+	{STYLE_chartreuse, "#7FFF00"},
+	{STYLE_chocolate, "#D2691E"},
+	{STYLE_coral, "#FF7F50"},
+	{STYLE_cornflowerblue, "#6495ED"},
+	{STYLE_cornsilk, "#FFF8DC"},
+	{STYLE_crimson, "#DC143C"},
+	{STYLE_cyan, "#00FFFF"},
+	{STYLE_darkblue, "#00008B"},
+	{STYLE_darkcyan, "#008B8B"},
+	{STYLE_darkgoldenrod, "#B8860B"},
+	{STYLE_darkgray, "#A9A9A9"},
+	{STYLE_darkgrey, "#A9A9A9"},
+	{STYLE_darkgreen, "#006400"},
+	{STYLE_darkkhaki, "#BDB76B"},
+	{STYLE_darkmagenta, "#8B008B"},
+	{STYLE_darkolivegreen, "#556B2F"},
+	{STYLE_darkorange, "#FF8C00"},
+	{STYLE_darkorchid, "#9932CC"},
+	{STYLE_darkred, "#8B0000"},
+	{STYLE_darksalmon, "#E9967A"},
+	{STYLE_darkseagreen, "#8FBC8F"},
+	{STYLE_darkslateblue, "#483D8B"},
+	{STYLE_darkslategray, "#2F4F4F"},
+	{STYLE_darkslategrey, "#2F4F4F"},
+	{STYLE_darkturquoise, "#00CED1"},
+	{STYLE_darkviolet, "#9400D3"},
+	{STYLE_deeppink, "#FF1493"},
+	{STYLE_deepskyblue, "#00BFFF"},
+	{STYLE_dimgray, "#696969"},
+	{STYLE_dodgerblue, "#1E90FF"},
+	{STYLE_firebrick, "#B22222"},
+	{STYLE_floralwhite, "#FFFAF0"},
+	{STYLE_forestgreen, "#228B22"},
+	{STYLE_fuchsia, "#FF00FF"},
+	{STYLE_gainsboro, "#DCDCDC"},
+	{STYLE_ghostwhite, "#F8F8FF"},
+	{STYLE_gold, "#FFD700"},
+	{STYLE_goldenrod, "#DAA520"},
+	{STYLE_grey, "#808080"},
+	{STYLE_green, "#008000"},
+	{STYLE_greenyellow, "#ADFF2F"},
+	{STYLE_honeydew, "#F0FFF0"},
+	{STYLE_hotpink, "#FF69B4"},
+	{STYLE_indianred , "#CD5C5C"},
+	{STYLE_indigo , "#4B0082"},
+	{STYLE_ivory, "#FFFFF0"},
+	{STYLE_khaki, "#F0E68C"},
+	{STYLE_lavender, "#E6E6FA"},
+	{STYLE_lavenderblush, "#FFF0F5"},
+	{STYLE_lawngreen, "#7CFC00"},
+	{STYLE_lemonchiffon, "#FFFACD"},
+	{STYLE_lightblue, "#ADD8E6"},
+	{STYLE_lightcoral, "#F08080"},
+	{STYLE_lightcyan, "#E0FFFF"},
+	{STYLE_lightgoldenrodyellow, "#FAFAD2"},
+	{STYLE_lightgray, "#D3D3D3"},
+	{STYLE_lightgreen, "#90EE90"},
+	{STYLE_lightpink, "#FFB6C1"},
+	{STYLE_lightsalmon, "#FFA07A"},
+	{STYLE_lightseagreen, "#20B2AA"},
+	{STYLE_lightskyblue, "#87CEFA"},
+	{STYLE_lightslategrey, "#778899"},
+	{STYLE_lightsteelblue, "#B0C4DE"},
+	{STYLE_lightyellow, "#FFFFE0"},
+	{STYLE_lime, "#00FF00"},
+	{STYLE_limegreen, "#32CD32"},
+	{STYLE_linen, "#FAF0E6"},
+	{STYLE_magenta, "#FF00FF"},
+	{STYLE_maroon, "#800000"},
+	{STYLE_mediumaquamarine, "#66CDAA"},
+	{STYLE_mediumblue, "#0000CD"},
+	{STYLE_mediumorchid, "#BA55D3"},
+	{STYLE_mediumpurple, "#9370DB"},
+	{STYLE_mediumseagreen, "#3CB371"},
+	{STYLE_mediumslateblue, "#7B68EE"},
+	{STYLE_mediumspringgreen, "#00FA9A"},
+	{STYLE_mediumturquoise, "#48D1CC"},
+	{STYLE_mediumvioletred, "#C71585"},
+	{STYLE_midnightblue, "#191970"},
+	{STYLE_mintcream, "#F5FFFA"},
+	{STYLE_mistyrose, "#FFE4E1"},
+	{STYLE_moccasin, "#FFE4B5"},
+	{STYLE_navajowhite, "#FFDEAD"},
+	{STYLE_navy, "#000080"},
+	{STYLE_oldlace, "#FDF5E6"},
+	{STYLE_olive, "#808000"},
+	{STYLE_olivedrab, "#6B8E23"},
+	{STYLE_orange, "#FFA500"},
+	{STYLE_orangered, "#FF4500"},
+	{STYLE_orchid, "#DA70D6"},
+	{STYLE_palegoldenrod, "#EEE8AA"},
+	{STYLE_palegreen, "#98FB98"},
+	{STYLE_paleturquoise, "#AFEEEE"},
+	{STYLE_palevioletred, "#DB7093"},
+	{STYLE_papayawhip, "#FFEFD5"},
+	{STYLE_peachpuff, "#FFDAB9"},
+	{STYLE_peru, "#CD853F"},
+	{STYLE_pink, "#FFC0CB"},
+	{STYLE_plum, "#DDA0DD"},
+	{STYLE_powderblue, "#B0E0E6"},
+	{STYLE_purple, "#800080"},
+	{STYLE_rebeccapurple, "#663399"},
+	{STYLE_red, "#FF0000"},
+	{STYLE_rosybrown, "#BC8F8F"},
+	{STYLE_royalblue, "#4169E1"},
+	{STYLE_saddlebrown, "#8B4513"},
+	{STYLE_salmon, "#FA8072"},
+	{STYLE_sandybrown, "#F4A460"},
+	{STYLE_seagreen, "#2E8B57"},
+	{STYLE_seashell, "#FFF5EE"},
+	{STYLE_sienna, "#A0522D"},
+	{STYLE_silver, "#C0C0C0"},
+	{STYLE_skyblue, "#87CEEB"},
+	{STYLE_slateblue, "#6A5ACD"},
+	{STYLE_slategray, "#708090"},
+	{STYLE_slategrey, "#708090"},
+	{STYLE_snow, "#FFFAFA"},
+	{STYLE_springgreen, "#00FF7F"},
+	{STYLE_steelblue, "#4682B4"},
+	{STYLE_tan, "#D2B48C"},
+	{STYLE_teal, "#008080"},
+	{STYLE_thistle, "#D8BFD8"},
+	{STYLE_tomato, "#FF6347"},
+	{STYLE_turquoise, "#40E0D0"},
+	{STYLE_violet, "#EE82EE"},
+	{STYLE_wheat, "#F5DEB3"},
+	{STYLE_white, "#FFFFFF"},
+	{STYLE_whitesmoke, "#F5F5F5"},
+	{STYLE_yellow, "#FFFF00"},
+	{STYLE_yellowgreen, "#9ACD32"},
+};
+
+constexpr USTRING SizeStrings [] = {
+	"1em", "1.1em", "1.2em", "1.3em", "1.4em", "0.03em", "0.05em", "0.04em",
+	"0px", "1px", "2px", "3px", "4px", "5px", "6px", "7px", "8px", "9px", "10px",
+	"11px", "12px", "14px", "15px", "18px",
+	"20px", "24px", "28px", "32px", "34px", "35px", "36px",
+};
+
+struct TEXT_STYLE_OFFSET
+{
+	float fontSize;
+};
+
+struct FONT_SIZE_UNIT
+{
+	float unit;
+	TOKEN name;
+};
+
+struct NAME_UNIT_PAIR
+{
+	TOKEN name;
+	float unit;
+
+	bool match(TOKEN other) const { return name == other; }
+	constexpr explicit operator bool() const { return IsValidRef(*this); }
+};
+
+struct NUMBER_UNIT_PAIR
+{
+	float number;
+	float unit;
+
+	bool match(float other) const { return number == other; }
+	constexpr explicit operator bool() const { return IsValidRef(*this); }
+};
+
+//template<unsigned int arraySize>
+//float FindNameUnit(NAME_UNIT_PAIR const (&array)[arraySize], TOKEN name)
+//{
+//	for (int i = 0; i < arraySize; i++)
+//	{
+//		if (array[i].name == name)
+//		{
+//			return array[i].unit;
+//		}
+//	}
+//	return UNDEFINED_FLOAT;
+//};
+//
+//template<unsigned int arraySize>
+//bool FindNameUnit(NAME_UNIT_PAIR const (&array)[arraySize], TOKEN name, float &unit)
+//{
+//	unit = UNDEFINED_FLOAT;
+//	for (int i = 0; i < arraySize; i++)
+//	{
+//		if (array[i].name == name)
+//		{
+//			unit = array[i].unit;
+//			return true;
+//		}
+//	}
+//	return false;
+//};
+
+template<unsigned int arraySize>
+float FindNumberUnit(NUMBER_UNIT_PAIR const (&array) [arraySize], float number)
+{
+	for (int i = 0; i < arraySize; i++)
+	{
+		if (array[i].number >= number)
+		{
+			return array[i].unit;
+		}
+	}
+	DBGBREAK();
+	return UNDEFINED_FLOAT;
+}
+
+template<unsigned int arraySize>
+bool FindNumberUnit(NUMBER_UNIT_PAIR const (&array)[arraySize], float number, float &unit)
+{
+	unit = UNDEFINED_FLOAT;
+	for (int i = 0; i < arraySize; i++)
+	{
+		if (array[i].number >= number)
+		{
+			unit = array[i].unit;
+			return true;
+		}
+	}
+	DBGBREAK();
+	return false;
+}
+
+constexpr NAME_UNIT_PAIR BackgroundRepeatUnitsA[] = { { STYLE_repeat, 1.0f }, { STYLE_no_repeat, 1.0f }, { STYLE_repeat_x, 1.0f }, {STYLE_repeat_y, 1.0f} };
+constexpr STREAM_READER<NAME_UNIT_PAIR> BackgroundRepeatUnits(BackgroundRepeatUnitsA);
+
+#define MAX_WIDTH  740
+constexpr NUMBER_UNIT_PAIR WidthUnits [] = { { 50, 0.1f }, { 110, 0.2f }, { 190, 0.4f }, { 250, 0.6f }, { 310, 0.8f }, { 370, 1.0f }, { 450, 1.2f }, { 570, 1.4f }, { 630, 1.6f }, { 690, 1.7f }, { MAX_WIDTH, 1.8f }, { 1024, 1.9f }, { 1200, 1.95f }, { 1920, 1.99f } };
+
+constexpr NAME_UNIT_PAIR FontFamilyUnitsA[] = { {STYLE_monospace, 0.8f}, { STYLE_sans_serif, 1.0f }, { STYLE_serif, 1.1f }, { STYLE_cursive, 1.3f }, { STYLE_fantasy, 1.5f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> FontFamilyUnits{ FontFamilyUnitsA };
+
+constexpr NAME_UNIT_PAIR FontStyleUnitsA[] = { {STYLE_italic, 1.2f}, { STYLE_oblique, 1.3f }, { STYLE_normal, 1.0f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> FontStyleUnits{ FontStyleUnitsA };
+
+constexpr NAME_UNIT_PAIR FontVariantUnitsA[] = { {STYLE_normal, 1.0f}, { STYLE_small_caps, 1.2f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> FontVariantUnits{ FontVariantUnitsA };
+
+constexpr NAME_UNIT_PAIR TextDecorationUnitsA[] = { {STYLE_line_through, 0.1f}, { STYLE_normal, 1.0f }, { STYLE_italic, 1.1f }, { STYLE_overline, 1.2f }, { STYLE_underline, 1.4f }, { STYLE_blink, 1.8f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> TextDecorationUnits{ TextDecorationUnitsA };
+
+constexpr NAME_UNIT_PAIR TextTransformUnitsA[] = { { STYLE_capitalize, 1.1f }, { STYLE_uppercase, 1.3f }, { STYLE_lowercase, 0.9f }, { STYLE_none, 1.0f }, };
+constexpr STREAM_READER<NAME_UNIT_PAIR> TextTransformUnits{ TextTransformUnitsA };
+
+constexpr NAME_UNIT_PAIR TextAlignUnitsA[] = { {STYLE_left, 1.0f}, { STYLE_right, 0.4f }, { STYLE_center, 1.4f }, { STYLE_justify, 0.8f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> TextAlignUnits{ TextAlignUnitsA }; 
+
+constexpr NAME_UNIT_PAIR FontWeightUnitsA[] = { {STYLE_normal, 1.0f}, { STYLE_bold, 1.1f }, { STYLE_bolder, 1.2f }, { STYLE_lighter, 0.8f }, { STYLE_100, 0.6f },
+{ STYLE_200, 0.7f }, { STYLE_300, 0.8f }, { STYLE_400, 1.0f }, { STYLE_500, 1.1f }, { STYLE_600, 1.2f }, { STYLE_700, 1.3f }, { STYLE_800, 1.4f }, { STYLE_900, 1.5f }, };
+constexpr STREAM_READER<NAME_UNIT_PAIR> FontWeightUnits{ FontWeightUnitsA };
+
+constexpr NAME_UNIT_PAIR  BorderWidthNameUnitsA[] = { {STYLE_thin, 1.0f}, { STYLE_medium, 1.2f }, { STYLE_thick, 1.4f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> BorderWidthNameUnits{ BorderWidthNameUnitsA };
+
+constexpr NUMBER_UNIT_PAIR BorderWidthUnits [] = { { 0, 0.01f }, { 2, 1.0f }, { 5, 1.2f }, { 10, 1.5f }, { 15, 1.8f }, { 20, 2.0f },  };
+
+constexpr NAME_UNIT_PAIR BorderStyleUnitsA[] = { {STYLE_solid, 1.0f}, { STYLE_dashed, 0.8f }, { STYLE_dotted, 0.7f }, { STYLE_none, 0.8f }, { STYLE_double, 1.2f }, { STYLE_hidden, 0.8f }, { STYLE_groove, 0.7f }, { STYLE_ridge, 1.2f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> BorderStyleUnits{ BorderStyleUnitsA };
+
+constexpr NAME_UNIT_PAIR FontSizeNameUnitsA[] = { {STYLE_xx_small, 0.5f}, { STYLE_x_small, 0.75f }, { STYLE_small, 0.9f }, { STYLE_medium, 1.0f }, { STYLE_large, 1.1f }, { STYLE_x_large, 1.25f }, { STYLE_xx_large, 1.5f } };
+constexpr STREAM_READER<NAME_UNIT_PAIR> FontSizeNameUnits{ FontSizeNameUnitsA };
+
+constexpr NUMBER_UNIT_PAIR  FontSizeUnits[] =  { { 6, 0.2f }, { 7, 0.3f }, { 8, 0.4f }, { 9, 0.6f }, { 10, 0.8f }, { 11, 0.9f }, { 12, 1 }, { 13, 1.1f },
+{ 14, 1.2f }, {15, 1.3f}, { 16, 1.4f }, { 18, 1.6f }, { 20, 1.7f }, { 22, 1.75f }, { 26, 1.8f }, { 28, 1.85f }, { 36, 1.9f },
+{ 48, 1.95f }, { 72, 2 } };
+
+constexpr NUMBER_UNIT_PAIR ColorNumberUnits[] = { { 10, 0.1f }, { 25, 0.25f }, { 30, 0.3f }, { 40, 0.4f }, { 50, 0.5f }, { 60, 0.6f }, { 70, 0.75f }, { 80, 0.9f }, { 125, 1.0f },
+{ 175, 1.1f }, { 185, 1.2f }, { 200, 1.3f }, { 210, 1.4f }, { 220, 1.5f }, { 225, 1.6f }, { 235, 1.7f }, { 240, 1.8f }, { 290, 1.9f }, { 350, 2.0f }, { 512, 2.0f } };
+
+typedef enum
+{
+	SIDE_TOP,
+	SIDE_RIGHT,
+	SIDE_BOTTOM,
+	SIDE_LEFT,
+	SIDE_ALL,
+} SIDE;
+
+constexpr float CSS_ENCODE_NAME(TOKEN name)
+{
+	return (float) (((UINT32)name._type) << 16 | name.getShortName());
+}
+
+constexpr TOKEN CSS_DECODE_NAME(float value)
+{
+	auto number = (UINT32)value;
+	return TOKEN((TOKENTYPE)((number & 0x00FF0000) >> 16), number & 0xFFFF);
+}
+
+constexpr float CSS_ENCODE_COLOR(HSV color)
+{
+	return (float)(color.value & 0xFFFFFF);
+}
+
+constexpr HSV CSS_DECODE_COLOR(float value)
+{
+	auto number = (UINT32)value;
+	return HSV(number);
+}
+//constexpr float EncodeName(TOKEN name)
+//{
+//	return (float)name.getShortName();
+//}
+//
+struct DEFAULT_STYLE_PROPERTIES
+{
+	TOKEN elementName;
+	CSS_PROPERTY_NAME propertyName;
+	CSS_SCALE scale;
+	float value;
+};
+
+constexpr DEFAULT_STYLE_PROPERTIES DefaultStyleProperties [] = {
+	{ ELEMENT_blockquote, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_blockquote, CSS_PROPERTY_MARGIN_RIGHT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_blockquote, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_blockquote, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.12f },
+
+	{ ELEMENT_figure, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_figure, CSS_PROPERTY_MARGIN_RIGHT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_figure, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_figure, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.12f },
+
+	{ ELEMENT_hr, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_AUTO, 0 },
+	{ ELEMENT_hr, CSS_PROPERTY_MARGIN_RIGHT, CSS_SCALE_AUTO, 0 },
+	{ ELEMENT_hr, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 0.5f },
+	{ ELEMENT_hr, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 0.5f },
+	{ ELEMENT_hr, CSS_PROPERTY_BORDER_WIDTH, CSS_SCALE_PIXEL, 1.0f },
+	{ ELEMENT_hr, CSS_PROPERTY_BORDER_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_inset)},
+
+	{ ELEMENT_legend, CSS_PROPERTY_PADDING_LEFT, CSS_SCALE_PIXEL, 2.0f },
+	{ ELEMENT_legend, CSS_PROPERTY_PADDING_RIGHT, CSS_SCALE_PIXEL, 2.0f },
+	{ ELEMENT_legend, CSS_PROPERTY_BORDER, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_none)},
+
+	{ ELEMENT_p, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.0f },
+	{ ELEMENT_p, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.0f },
+
+	{ ELEMENT_pre, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.0f },
+	{ ELEMENT_pre, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.0f },
+
+	{ ELEMENT_h1, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 0.67f },
+	{ ELEMENT_h1, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 0.67f },
+	{ ELEMENT_h1, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 2.0f },
+	{ ELEMENT_h1, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bolder) },
+
+	{ ELEMENT_h2, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 0.75f },
+	{ ELEMENT_h2, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 0.75f },
+	{ ELEMENT_h2, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 1.5f },
+	{ ELEMENT_h2, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bolder) },
+
+	{ ELEMENT_h3, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 0.83f },
+	{ ELEMENT_h3, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 0.83f },
+	{ ELEMENT_h3, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 1.17f },
+	{ ELEMENT_h3, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bolder) },
+
+	{ ELEMENT_h4, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_h4, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_h4, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 1.0f },
+	{ ELEMENT_h4, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bolder) },
+
+	{ ELEMENT_h5, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.5f },
+	{ ELEMENT_h5, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.5f },
+	{ ELEMENT_h5, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 0.83f },
+	{ ELEMENT_h5, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bolder) },
+
+	{ ELEMENT_h6, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.67f },
+	{ ELEMENT_h6, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.67f },
+	{ ELEMENT_h6, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 0.75f },
+	{ ELEMENT_h6, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bolder) },
+
+	{ ELEMENT_code, CSS_PROPERTY_FONT_FAMILY, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_monospace) },
+	{ ELEMENT_pre, CSS_PROPERTY_FONT_FAMILY, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_monospace) },
+	{ ELEMENT_samp, CSS_PROPERTY_FONT_FAMILY, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_monospace) },
+
+	{ ELEMENT_small, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 0.83f },
+	{ ELEMENT_sub, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 0.83f },
+	{ ELEMENT_sup, CSS_PROPERTY_FONT_SIZE, CSS_SCALE_EM, 0.83f },
+
+	{ ELEMENT_ol, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_dd, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_PIXEL, 40 },
+
+	{ ELEMENT_menu, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_menu, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.0f },
+	{ ELEMENT_menu, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.0f },
+	{ ELEMENT_menu, CSS_PROPERTY_LIST_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_disc)},
+
+	{ ELEMENT_i, CSS_PROPERTY_FONT_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_italic) },
+	{ ELEMENT_cite, CSS_PROPERTY_FONT_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_italic) },
+	{ ELEMENT_em, CSS_PROPERTY_FONT_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_italic) },
+	{ ELEMENT_var, CSS_PROPERTY_FONT_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_italic) },
+
+	{ ELEMENT_ol, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_ol, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_dl, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_dl, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.12f },
+
+	{ ELEMENT_ul, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_ul, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_EM, 1.12f },
+	{ ELEMENT_ul, CSS_PROPERTY_PADDING_LEFT, CSS_SCALE_PIXEL, 40 },
+	{ ELEMENT_ul, CSS_PROPERTY_LIST_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_disc)},
+
+	{ ELEMENT_body, CSS_PROPERTY_MARGIN_TOP, CSS_SCALE_PIXEL, 8.0f },
+	{ ELEMENT_body, CSS_PROPERTY_MARGIN_RIGHT, CSS_SCALE_PIXEL, 8.0f },
+	{ ELEMENT_body, CSS_PROPERTY_MARGIN_BOTTOM, CSS_SCALE_PIXEL, 8.0f },
+	{ ELEMENT_body, CSS_PROPERTY_MARGIN_LEFT, CSS_SCALE_PIXEL, 8.0f },
+
+	{ ELEMENT_caption, CSS_PROPERTY_TEXT_ALIGN, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_center) },
+
+	{ ELEMENT_tfoot, CSS_PROPERTY_VERTICAL_ALIGN, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_middle) },
+	{ ELEMENT_thead, CSS_PROPERTY_VERTICAL_ALIGN, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_middle) },
+	{ ELEMENT_tbody, CSS_PROPERTY_VERTICAL_ALIGN, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_middle) },
+	{ ELEMENT_th, CSS_PROPERTY_VERTICAL_ALIGN, CSS_SCALE_INHERIT, 0 },
+	{ ELEMENT_tr, CSS_PROPERTY_VERTICAL_ALIGN, CSS_SCALE_INHERIT, 0 },
+	{ ELEMENT_tbody, CSS_PROPERTY_BORDER_COLOR, CSS_SCALE_INHERIT, 0 },
+	{ ELEMENT_th, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bold) },
+	{ ELEMENT_th, CSS_PROPERTY_TEXT_ALIGN, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_center) },
+	{ ELEMENT_tfoot, CSS_PROPERTY_BORDER_COLOR, CSS_SCALE_INHERIT, 0 },
+	{ ELEMENT_thead, CSS_PROPERTY_BORDER_COLOR, CSS_SCALE_INHERIT, 0 },
+	{ ELEMENT_tr, CSS_PROPERTY_BORDER_COLOR, CSS_SCALE_INHERIT, 0 },
+
+	{ ELEMENT_mark, CSS_PROPERTY_COLOR, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_black) },
+	{ ELEMENT_mark, CSS_PROPERTY_BACKGROUND_COLOR, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_yellow) },
+
+	{ ELEMENT_u, CSS_PROPERTY_TEXT_DECORATION, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_underline) },
+	{ ELEMENT_s, CSS_PROPERTY_TEXT_DECORATION, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_line_through) },
+	{ ELEMENT_a, CSS_PROPERTY_TEXT_DECORATION, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_underline) },
+	{ ELEMENT_ins, CSS_PROPERTY_TEXT_DECORATION, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_underline) },
+	{ ELEMENT_b, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bold) },
+	{ ELEMENT_strong, CSS_PROPERTY_FONT_WEIGHT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_bold) },
+	{ ELEMENT_address, CSS_PROPERTY_FONT_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_italic) },
+	{ ELEMENT_dfn, CSS_PROPERTY_FONT_STYLE, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_italic) },
+
+	//{ ELEMENT_TBODY, CSS_PROPERTY_CLEAR, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_BOTH), 255 },
+	//{ ELEMENT_THEAD, CSS_PROPERTY_CLEAR, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_BOTH), 255 },
+	//{ ELEMENT_TFOOT, CSS_PROPERTY_CLEAR, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_BOTH), 255 },
+
+	//{ ELEMENT_TR, CSS_PROPERTY_CLEAR, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_BOTH), 255 },
+	//{ ELEMENT_TD, CSS_PROPERTY_FLOAT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_LEFT), 255 },
+	//{ ELEMENT_TH, CSS_PROPERTY_FLOAT, CSS_SCALE_NAME, CSS_ENCODE_NAME(STYLE_LEFT), 255 },
+};
+
+struct ELEMENT_DISPLAY_STYLE
+{
+	TOKEN name;
+	CSS_STREAM style;
+
+	bool match(TOKEN& other) { return name == other; }
+	explicit operator bool() const { return IsValidRef(*this); }
+};
+
+struct NAME_DISPLAY_PAIR 
+{ 
+	TOKEN name; 
+	CSS_DISPLAY display; 
+	bool match(TOKEN& other) { return name == other; }
+};
+
+constexpr NAME_DISPLAY_PAIR ElementDisplayMap[] = { { ELEMENT_div, DISPLAY_BLOCK }, { ELEMENT_p, DISPLAY_BLOCK }, { ELEMENT_a, DISPLAY_INLINE }, { ELEMENT_text, DISPLAY_INLINE }, { ELEMENT_span, DISPLAY_INLINE }, { ELEMENT_ul, DISPLAY_BLOCK }, { ELEMENT_li, DISPLAY_LIST_ITEM }, { ELEMENT_ol, DISPLAY_BLOCK }, { ELEMENT_br, DISPLAY_INLINE }, { ELEMENT_form, DISPLAY_BLOCK }, { ELEMENT_label, DISPLAY_INLINE_BLOCK },
+{ ELEMENT_h1, DISPLAY_BLOCK }, { ELEMENT_h2, DISPLAY_BLOCK }, { ELEMENT_b, DISPLAY_INLINE }, { ELEMENT_s, DISPLAY_INLINE }, { ELEMENT_strong, DISPLAY_INLINE }, { ELEMENT_sub, DISPLAY_INLINE }, { ELEMENT_sup, DISPLAY_INLINE }, { ELEMENT_body, DISPLAY_BLOCK }, { ELEMENT_table, DISPLAY_TABLE }, { ELEMENT_tbody, DISPLAY_TABLE_ROW_GROUP }, { ELEMENT_thead, DISPLAY_TABLE_HEADER_GROUP }, { ELEMENT_tfoot, DISPLAY_TABLE_FOOTER_GROUP }, { ELEMENT_tr, DISPLAY_TABLE_ROW }, { ELEMENT_footer, DISPLAY_BLOCK }, { ELEMENT_td, DISPLAY_TABLE_CELL }, { ELEMENT_th, DISPLAY_TABLE_CELL }, { ELEMENT_label, DISPLAY_INLINE },
+{ ELEMENT_blockquote, DISPLAY_BLOCK }, { ELEMENT_iframe, DISPLAY_NONE }, { ELEMENT_dl, DISPLAY_BLOCK }, { ELEMENT_hr, DISPLAY_BLOCK }, { ELEMENT_menu, DISPLAY_BLOCK }, { ELEMENT_section, DISPLAY_BLOCK }, { ELEMENT_img, DISPLAY_INLINE_BLOCK }, { ELEMENT_i, DISPLAY_INLINE }, { ELEMENT_em, DISPLAY_INLINE }, { ELEMENT_u, DISPLAY_INLINE }, { ELEMENT_dd, DISPLAY_BLOCK }, { ELEMENT_col, DISPLAY_TABLE_COLUMN }, { ELEMENT_colgroup, DISPLAY_TABLE_COLUMN_GROUP }, { ELEMENT_dt, DISPLAY_BLOCK }, { ELEMENT_caption, DISPLAY_TABLE_CAPTION }, { ELEMENT_input, DISPLAY_INLINE_BLOCK }, { ELEMENT_button, DISPLAY_INLINE_BLOCK },
+{ ELEMENT_address, DISPLAY_BLOCK }, { ELEMENT_summary, DISPLAY_BLOCK }, { ELEMENT_nav, DISPLAY_BLOCK }, { ELEMENT_select, DISPLAY_INLINE }, { ELEMENT_small, DISPLAY_INLINE }, { ELEMENT_q, DISPLAY_INLINE }, { ELEMENT_ins, DISPLAY_INLINE }, { ELEMENT_textarea, DISPLAY_INLINE_BLOCK }, { ELEMENT_code, DISPLAY_INLINE }, { ELEMENT_pre, DISPLAY_BLOCK }, { ELEMENT_h3, DISPLAY_BLOCK }, { ELEMENT_mark, DISPLAY_INLINE }, { ELEMENT_h4, DISPLAY_BLOCK }, { ELEMENT_h5, DISPLAY_BLOCK }, { ELEMENT_h6, DISPLAY_BLOCK }, { ELEMENT_samp, DISPLAY_INLINE }, { ELEMENT_abbr, DISPLAY_INLINE }, { ELEMENT_time, DISPLAY_INLINE },
+{ ELEMENT_area, DISPLAY_NONE }, { ELEMENT_header, DISPLAY_BLOCK }, { ELEMENT_legend, DISPLAY_BLOCK }, { ELEMENT_cite, DISPLAY_INLINE }, { ELEMENT_var, DISPLAY_INLINE }, { ELEMENT_data, DISPLAY_INLINE }, { ELEMENT_rt, DISPLAY_INLINE }, { ELEMENT_rp, DISPLAY_INLINE }, { ELEMENT_bdi, DISPLAY_INLINE }, { ELEMENT_bdo, DISPLAY_INLINE }, { ELEMENT_wbr, DISPLAY_INLINE },
+{ ELEMENT_hgroup, DISPLAY_BLOCK }, { ELEMENT_article, DISPLAY_BLOCK }, { ELEMENT_aside, DISPLAY_BLOCK }, { ELEMENT_details, DISPLAY_BLOCK }, { ELEMENT_dfn, DISPLAY_INLINE }, { ELEMENT_figcaption, DISPLAY_BLOCK }, { ELEMENT_figure, DISPLAY_BLOCK }, {ELEMENT_center, DISPLAY_BLOCK},
+};
+
+constexpr NAME_DISPLAY_PAIR StyleDisplayMap [] = { { STYLE_block, DISPLAY_BLOCK }, { STYLE_inherit, DISPLAY_INHERIT }, { STYLE_none, DISPLAY_NONE },
+{ STYLE_inline, DISPLAY_INLINE }, { STYLE_table, DISPLAY_TABLE }, { STYLE_inline_block, DISPLAY_INLINE_BLOCK }, { STYLE_inline_flex, DISPLAY_INLINE_BLOCK }, { STYLE_grid, DISPLAY_GRID},
+{ STYLE_list_item, DISPLAY_LIST_ITEM }, { STYLE_inline_table, DISPLAY_INLINE_TABLE}, { STYLE_table_row, DISPLAY_TABLE_ROW }, { STYLE_table_cell, DISPLAY_TABLE_CELL }, { STYLE_table_caption, DISPLAY_TABLE_CAPTION }, { STYLE_table_rowgroup, DISPLAY_TABLE_ROW_GROUP },
+{ STYLE_table_header_group, DISPLAY_TABLE_HEADER_GROUP }, { STYLE_table_footer_group, DISPLAY_TABLE_FOOTER_GROUP }, {STYLE_table_column, DISPLAY_TABLE_COLUMN},
+{ STYLE__webkit_box, DISPLAY_BLOCK}, { STYLE__webkit_flex, DISPLAY_BLOCK}, { STYLE__webkit_inline_box, DISPLAY_BLOCK}, { STYLE__webkit_inline_flex, DISPLAY_BLOCK}, { STYLE__ms_inline_flexbox, DISPLAY_BLOCK}, { STYLE__ms_flexbox, DISPLAY_BLOCK}, { STYLE_flex, DISPLAY_BLOCK}, {STYLE__webkit_box_flex, DISPLAY_BLOCK},
+};
+
+struct CSS_PROPERTY_NAME_STRING_MAP
+{
+	TOKEN name;
+	CSS_PROPERTY_NAME property;
+};
+
+constexpr CSS_PROPERTY_NAME_STRING_MAP PropertyNames [] = {
+	{ STYLE_font, CSS_PROPERTY_FONT },
+	{ STYLE_font_family, CSS_PROPERTY_FONT_FAMILY },
+	{ STYLE_font_size, CSS_PROPERTY_FONT_SIZE },
+	{ STYLE_font_weight, CSS_PROPERTY_FONT_WEIGHT },
+	{ STYLE_font_variant, CSS_PROPERTY_FONT_VARIANT },
+	{ STYLE_font_style, CSS_PROPERTY_FONT_STYLE },
+	{ STYLE_display, CSS_PROPERTY_DISPLAY },
+	{ STYLE_color, CSS_PROPERTY_COLOR },
+	{ STYLE_background_color, CSS_PROPERTY_BACKGROUND_COLOR },
+	{ STYLE_background, CSS_PROPERTY_BACKGROUND },
+	//{ style_background_image, CSS_PROPERTY_BACKGROUND_IMAGE },
+	{ STYLE_width, CSS_PROPERTY_WIDTH },
+	{ STYLE_height, CSS_PROPERTY_HEIGHT },
+	{ STYLE_float, CSS_PROPERTY_FLOAT },
+	{ STYLE_clear, CSS_PROPERTY_CLEAR },
+	{ STYLE_padding, CSS_PROPERTY_PADDING },
+	{ STYLE_padding_left, CSS_PROPERTY_PADDING_LEFT },
+	{ STYLE_padding_right, CSS_PROPERTY_PADDING_RIGHT },
+	{ STYLE_padding_top, CSS_PROPERTY_PADDING_TOP },
+	{ STYLE_padding_bottom, CSS_PROPERTY_PADDING_BOTTOM },
+	{ STYLE_margin, CSS_PROPERTY_MARGIN },
+	{ STYLE_margin_left, CSS_PROPERTY_MARGIN_LEFT },
+	{ STYLE_margin_right, CSS_PROPERTY_MARGIN_RIGHT },
+	{ STYLE_margin_top, CSS_PROPERTY_MARGIN_TOP },
+	{ STYLE_margin_bottom, CSS_PROPERTY_MARGIN_BOTTOM },
+	{ STYLE_border, CSS_PROPERTY_BORDER },
+	{ STYLE_border_top, CSS_PROPERTY_BORDER_TOP },
+	{ STYLE_border_bottom, CSS_PROPERTY_BORDER_BOTTOM },
+	{ STYLE_border_left, CSS_PROPERTY_BORDER_LEFT },
+	{ STYLE_border_right, CSS_PROPERTY_BORDER_RIGHT },
+	{ STYLE_border_top_color, CSS_PROPERTY_BORDER_TOP_COLOR },
+	{ STYLE_border_bottom_color, CSS_PROPERTY_BORDER_BOTTOM_COLOR },
+	{ STYLE_border_left_color, CSS_PROPERTY_BORDER_LEFT_COLOR },
+	{ STYLE_border_right_color, CSS_PROPERTY_BORDER_RIGHT_COLOR },
+	{ STYLE_border_color, CSS_PROPERTY_BORDER_COLOR },
+	{ STYLE_border_top_style, CSS_PROPERTY_BORDER_TOP_STYLE },
+	{ STYLE_border_bottom_style, CSS_PROPERTY_BORDER_BOTTOM_STYLE },
+	{ STYLE_border_left_style, CSS_PROPERTY_BORDER_LEFT_STYLE },
+	{ STYLE_border_right_style, CSS_PROPERTY_BORDER_RIGHT_STYLE },
+	{ STYLE_border_style, CSS_PROPERTY_BORDER_STYLE },
+	{ STYLE_border_top_width, CSS_PROPERTY_BORDER_TOP_WIDTH },
+	{ STYLE_border_bottom_width, CSS_PROPERTY_BORDER_BOTTOM_WIDTH },
+	{ STYLE_border_left_width, CSS_PROPERTY_BORDER_LEFT_WIDTH },
+	{ STYLE_border_right_width, CSS_PROPERTY_BORDER_RIGHT_WIDTH },
+	{ STYLE_border_width, CSS_PROPERTY_BORDER_WIDTH },
+	{ STYLE_text_decoration, CSS_PROPERTY_TEXT_DECORATION },
+	{ STYLE_text_align, CSS_PROPERTY_TEXT_ALIGN },
+	{ STYLE_text_indent, CSS_PROPERTY_TEXT_INDENT },
+	{ STYLE_text_transform, CSS_PROPERTY_TEXT_TRANSFORM },
+	{ STYLE_line_height, CSS_PROPERTY_LINE_HEIGHT },
+	{ STYLE_font_size_adjust, CSS_PROPERTY_FONT_SIZE_ADJUST },
+	{ STYLE_font_stretch, CSS_PROPERTY_FONT_STRETCH },
+	{ STYLE_border_image, CSS_PROPERTY_BORDER_IMAGE },
+	{ STYLE_border_collapse, CSS_PROPERTY_BORDER_COLLAPSE },
+	{ STYLE_border_spacing, CSS_PROPERTY_BORDER_SPACING },
+	{ STYLE_vertical_align, CSS_PROPERTY_VERTICAL_ALIGN },
+	{ STYLE_overflow, CSS_PROPERTY_OVERFLOW },
+	{ STYLE_list_style_image, CSS_PROPERTY_LIST_STYLE_IMAGE },
+	{ STYLE_list_style_position, CSS_PROPERTY_LIST_STYLE_POSITION },
+	{ STYLE_list_style_type, CSS_PROPERTY_LIST_STYLE_TYPE },
+	{ STYLE_white_space, CSS_PROPERTY_WHITE_SPACE },
+	{ STYLE_background_attachment, CSS_PROPERTY_BACKGROUND_ATTACHMENT },
+	{ STYLE_background_position, CSS_PROPERTY_BACKGROUND_POSITION },
+	{ STYLE_background_repeat, CSS_PROPERTY_BACKGROUND_REPEAT },
+	{ STYLE_cursor, CSS_PROPERTY_CURSOR },
+	{ STYLE_letter_spacing, CSS_PROPERTY_LETTER_SPACING },
+	{ STYLE_opacity, CSS_PROPERTY_OPACITY },
+	{ STYLE_z_index, CSS_PROPERTY_Z_INDEX },
+	{ STYLE_resize, CSS_PROPERTY_RESIZE },
+	{ STYLE_zoom, CSS_PROPERTY_ZOOM },
+	{ STYLE_text_shadow, CSS_PROPERTY_TEXT_SHADOW },
+	{ STYLE_clip, CSS_PROPERTY_CLIP },
+	{ STYLE_word_spacing, CSS_PROPERTY_WORD_SPACING },
+	{ STYLE_text_overflow, CSS_PROPERTY_TEXT_OVERFLOW },
+	{ STYLE_filter, CSS_PROPERTY_FILTER },
+	{ STYLE_list_style, CSS_PROPERTY_LIST_STYLE },
+	{ STYLE_word_wrap, CSS_PROPERTY_WORD_WRAP },
+	{ STYLE_table_layout, CSS_PROPERTY_TABLE_LAYOUT },
+	{ STYLE_visibility, CSS_PROPERTY_VISIBILITY },
+	{ STYLE_position, CSS_PROPERTY_POSITION },
+	{ STYLE_top, CSS_PROPERTY_TOP },
+	{ STYLE_bottom, CSS_PROPERTY_BOTTOM },
+	{ STYLE_left, CSS_PROPERTY_LEFT },
+	{ STYLE_right, CSS_PROPERTY_RIGHT },
+	{ STYLE_min_height, CSS_PROPERTY_MIN_HEIGHT },
+	{ STYLE_min_width, CSS_PROPERTY_MIN_WIDTH },
+	{ STYLE_max_height, CSS_PROPERTY_MAX_HEIGHT },
+	{ STYLE_max_width, CSS_PROPERTY_MAX_WIDTH },
+};
+
+enum SELECTION_SCOPE : UINT8
+{
+	SELECTION_SCOPE_UNDEFINED = 0,
+	SELECTION_SCOPE_DIRECT,
+	SELECTION_SCOPE_DESCENDANT,
+	SELECTION_SCOPE_CHILD,
+	SELECTION_SCOPE_NEXT_SIBLING,
+	SELECTION_SCOPE_LATER_SIBLING,
+};
+
+enum SELECTION_FILTER : UINT8
+{
+	SELECTION_FILTER_UNDEFINED = 0,
+	SELECTION_FILTER_NONE,
+	SELECTION_FILTER_ID,
+	SELECTION_FILTER_CLASS,
+	SELECTION_FILTER_ATTR,
+};
+
+enum SELECTION_ATTR_MATCH : UINT8
+{
+	SELECTION_ATTR_UNDEFINED = 0,
+	SELECTION_ATTR_NONE,
+	SELECTION_ATTR_EXISTS,
+	SELECTION_ATTR_EQUALS,
+	SELECTION_ATTR_STARTS_WITH,
+	SELECTION_ATTR_ENDS_WITH,
+	SELECTION_ATTR_CONTAINS,
+	SELECTION_ATTR_ONE_OF_MANY,
+	SELECTION_ATTR_ONE_OF_HYPHEN,
+};
+
+enum PSEUDO_SELECTOR : UINT8
+{
+	PSEUDO_SELECTOR_UNDEFINED = 0,
+	PSEUDO_SELECTOR_IDENTITY,
+	PSEUDO_SELECTOR_FIRST_CHILD,
+	PSEUDO_SELECTOR_LAST_CHILD,
+	PSEUDO_SELECTOR_NTH_CHILD,
+	PSEUDO_SELECTOR_NTH_LAST_CHILD,
+	PSEUDO_SELECTOR_FIRST_LETTER,
+	PSEUDO_SELECTOR_FIRST_LINE,
+	PSEUDO_SELECTOR_HOVER,
+	PSEUDO_SELECTOR_FOCUS,
+	PSEUDO_SELECTOR_IN_RANGE,
+	PSEUDO_SELECTOR_OUT_OF_RANGE,
+	PSEUDO_SELECTOR_ENABLED,
+	PSEUDO_SELECTOR_DISABLED,
+	PSEUDO_SELECTOR_CHECKED,
+	PSEUDO_SELECTOR_ACTIVE,
+	PSEUDO_SELECTOR_EMPTY,
+	PSEUDO_SELECTOR_BEFORE,
+	PSEUDO_SELECTOR_AFTER,
+	PSEUDO_SELECTOR_LINK,
+	PSEUDO_SELECTOR_REQUIRED,
+	PSEUDO_SELECTOR_OPTIONAL,
+	PSEUDO_SELECTOR_ROOT,
+	PSEUDO_SELECTOR_TARGET,
+	PSEUDO_SELECTOR_VALID,
+	PSEUDO_SELECTOR_INVALID,
+	PSEUDO_SELECTOR_VISITED,
+	PSEUDO_SELECTOR_ONLY_CHILD,
+	PSEUDO_SELECTOR_ONLY_OF_TYPE,
+	PSEUDO_SELECTOR_NTH_OF_TYPE,
+	PSEUDO_SELECTOR_NTH_LAST_OF_TYPE,
+	PSEUDO_SELECTOR_LANGUAGE,
+	PSEUDO_SELECTOR_NOT,
+	PSEUDO_SELECTOR_HAS,
+	PSEUDO_SELECTOR_JQUERY,
+	PSEUDO_SELECTOR_INPUT,
+	PSEUDO_SELECTOR_BUTTON,
+	PSEUDO_SELECTOR_TEXT,
+	PSEUDO_SELECTOR_HEADER,
+	PSEUDO_SELECTOR_IMAGE,
+	PSEUDO_SELECTOR_PASSWORD,
+	PSEUDO_SELECTOR_RADIO,
+	PSEUDO_SELECTOR_VISIBLE,
+	PSEUDO_SELECTOR_SUBMIT,
+
+};
+
+struct DOCUMENT_PROPERTY
+{
+	CSS_PROPERTY_NAME name;
+	CSS_SCALE scale;
+	float value;
+};
+
+struct NAME_CHAR_MAP
+{
+	TOKEN name;
+	wchar_t letter;
+};
+
+constexpr const NAME_CHAR_MAP EntityMap[] = {
+	{ ENTITY_AElig, L'Æ' },
+	{ ENTITY_Aacute, L'Á' },
+	{ ENTITY_Acirc, L'Â' },
+	{ ENTITY_Agrave, L'À' },
+	{ ENTITY_Alpha, L'Α' },
+	{ ENTITY_Aring, L'Å' },
+	{ ENTITY_Atilde, L'Ã' },
+	{ ENTITY_Auml, L'Ä' },
+	{ ENTITY_Beta, L'Β' },
+	{ ENTITY_Ccedil, L'Ç' },
+	{ ENTITY_Chi, L'Χ' },
+	{ ENTITY_Dagger, L'‡' },
+	{ ENTITY_Delta, L'Δ' },
+	{ ENTITY_ETH, L'Ð' },
+	{ ENTITY_Eacute, L'É' },
+	{ ENTITY_Ecirc, L'Ê' },
+	{ ENTITY_Egrave, L'È' },
+	{ ENTITY_Epsilon, L'Ε' },
+	{ ENTITY_Eta, L'Η' },
+	{ ENTITY_Euml, L'Ë' },
+	{ ENTITY_Gamma, L'Γ' },
+	{ ENTITY_Iacute, L'Í' },
+	{ ENTITY_Icirc, L'Î' },
+	{ ENTITY_Igrave, L'Ì' },
+	{ ENTITY_Iota, L'Ι' },
+	{ ENTITY_Iuml, L'Ï' },
+	{ ENTITY_Kappa, L'Κ' },
+	{ ENTITY_Lambda, L'Λ' },
+	{ ENTITY_Mu, L'Μ' },
+	{ ENTITY_Ntilde, L'Ñ' },
+	{ ENTITY_Nu, L'Ν' },
+	{ ENTITY_OElig, L'Œ' },
+	{ ENTITY_Oacute, L'Ó' },
+	{ ENTITY_Ocirc, L'Ô' },
+	{ ENTITY_Ograve, L'Ò' },
+	{ ENTITY_Omega, L'Ω' },
+	{ ENTITY_Omicron, L'Ο' },
+	{ ENTITY_Oslash, L'Ø' },
+	{ ENTITY_Otilde, L'Õ' },
+	{ ENTITY_Ouml, L'Ö' },
+	{ ENTITY_Phi, L'Φ' },
+	{ ENTITY_Pi, L'Π' },
+	{ ENTITY_Prime, L'″' },
+	{ ENTITY_Psi, L'Ψ' },
+	{ ENTITY_Rho, L'Ρ' },
+	{ ENTITY_Scaron, L'Š' },
+	{ ENTITY_Sigma, L'Σ' },
+	{ ENTITY_THORN, L'Þ' },
+	{ ENTITY_Tau, L'Τ' },
+	{ ENTITY_Theta, L'Θ' },
+	{ ENTITY_Uacute, L'Ú' },
+	{ ENTITY_Ucirc, L'Û' },
+	{ ENTITY_Ugrave, L'Ù' },
+	{ ENTITY_Upsilon, L'Υ' },
+	{ ENTITY_Uuml, L'Ü' },
+	{ ENTITY_Xi, L'Ξ' },
+	{ ENTITY_Yacute, L'Ý' },
+	{ ENTITY_Yuml, L'Ÿ' },
+	{ ENTITY_Zeta, L'Ζ' },
+	{ ENTITY_aacute, L'á' },
+	{ ENTITY_acirc, L'â' },
+	{ ENTITY_acute, L'´' },
+	{ ENTITY_aelig, L'æ' },
+	{ ENTITY_agrave, L'à' },
+	{ ENTITY_alefsym, L'ℵ' },
+	{ ENTITY_alpha, L'α' },
+	{ ENTITY_amp, L'&' },
+	{ ENTITY_and, L'∧' },
+	{ ENTITY_ang, L'∠' },
+	{ ENTITY_apos, L'\'' },
+	{ ENTITY_aring, L'å' },
+	{ ENTITY_asymp, L'≈' },
+	{ ENTITY_atilde, L'ã' },
+	{ ENTITY_auml, L'ä' },
+	{ ENTITY_bdquo, L'„' },
+	{ ENTITY_beta, L'β' },
+	{ ENTITY_brvbar, L'¦' },
+	{ ENTITY_bull, L'•' },
+	{ ENTITY_cap, L'∩' },
+	{ ENTITY_ccedil, L'ç' },
+	{ ENTITY_cedil, L'¸' },
+	{ ENTITY_cent, L'¢' },
+	{ ENTITY_chi, L'χ' },
+	{ ENTITY_circ, L'ˆ' },
+	{ ENTITY_clubs, L'♣' },
+	{ ENTITY_cong, L'≅' },
+	{ ENTITY_copy, L'©' },
+	{ ENTITY_crarr, L'↵' },
+	{ ENTITY_cup, L'∪' },
+	{ ENTITY_curren, L'¤' },
+	{ ENTITY_dArr, L'⇓' },
+	{ ENTITY_dagger, L'†' },
+	{ ENTITY_darr, L'↓' },
+	{ ENTITY_deg, L'°' },
+	{ ENTITY_delta, L'δ' },
+	{ ENTITY_diams, L'♦' },
+	{ ENTITY_divide, L'÷' },
+	{ ENTITY_eacute, L'é' },
+	{ ENTITY_ecirc, L'ê' },
+	{ ENTITY_egrave, L'è' },
+	{ ENTITY_empty, L'∅' },
+	{ ENTITY_emsp, L' ' },
+	{ ENTITY_ensp, L' ' },
+	{ ENTITY_epsilon, L'ε' },
+	{ ENTITY_equiv, L'≡' },
+	{ ENTITY_eta, L'η' },
+	{ ENTITY_eth, L'ð' },
+	{ ENTITY_euml, L'ë' },
+	{ ENTITY_euro, L'€' },
+	{ ENTITY_exist, L'∃' },
+	{ ENTITY_fnof, L'ƒ' },
+	{ ENTITY_forall, L'∀' },
+	{ ENTITY_frac12, L'½' },
+	{ ENTITY_frac14, L'¼' },
+	{ ENTITY_frac34, L'¾' },
+	{ ENTITY_frasl, L'⁄' },
+	{ ENTITY_gamma, L'γ' },
+	{ ENTITY_ge, L'≥' },
+	{ ENTITY_gt, L'>' },
+	{ ENTITY_hArr, L'⇔' },
+	{ ENTITY_harr, L'↔' },
+	{ ENTITY_hearts, L'♥' },
+	{ ENTITY_hellip, L'…' },
+	{ ENTITY_iacute, L'í' },
+	{ ENTITY_icirc, L'î' },
+	{ ENTITY_iexcl, L'¡' },
+	{ ENTITY_igrave, L'ì' },
+	{ ENTITY_image, L'ℑ' },
+	{ ENTITY_infin, L'∞' },
+	{ ENTITY_int, L'∫' },
+	{ ENTITY_iota, L'ι' },
+	{ ENTITY_iquest, L'¿' },
+	{ ENTITY_isin, L'∈' },
+	{ ENTITY_iuml, L'ï' },
+	{ ENTITY_kappa, L'κ' },
+	{ ENTITY_lArr, L'⇐' },
+	{ ENTITY_lambda, L'λ' },
+	{ ENTITY_lang, L'〈' },
+	{ ENTITY_laquo, L'«' },
+	{ ENTITY_larr, L'←' },
+	{ ENTITY_lceil, L'⌈' },
+	{ ENTITY_ldquo, L'“' },
+	{ ENTITY_le, L'≤' },
+	{ ENTITY_lfloor, L'⌊' },
+	{ ENTITY_lowast, L'∗' },
+	{ ENTITY_loz, L'◊' },
+	{ ENTITY_lrm, L'\x200e' },
+	{ ENTITY_lsaquo, L'‹' },
+	{ ENTITY_lsquo, L'‘' },
+	{ ENTITY_lt, L'<' },
+	{ ENTITY_macr, L'¯' },
+	{ ENTITY_mdash, L'—' },
+	{ ENTITY_micro, L'µ' },
+	{ ENTITY_middot, L'·' },
+	{ ENTITY_minus, L'−' },
+	{ ENTITY_mu, L'μ' },
+	{ ENTITY_nabla, L'∇' },
+	{ ENTITY_nbsp, L' ' },
+	{ ENTITY_ndash, L'–' },
+	{ ENTITY_ne, L'≠' },
+	{ ENTITY_ni, L'∋' },
+	{ ENTITY_not, L'¬' },
+	{ ENTITY_notin, L'∉' },
+	{ ENTITY_nsub, L'⊄' },
+	{ ENTITY_ntilde, L'ñ' },
+	{ ENTITY_nu, L'ν' },
+	{ ENTITY_oacute, L'ó' },
+	{ ENTITY_ocirc, L'ô' },
+	{ ENTITY_oelig, L'œ' },
+	{ ENTITY_ograve, L'ò' },
+	{ ENTITY_oline, L'‾' },
+	{ ENTITY_omega, L'ω' },
+	{ ENTITY_omicron, L'ο' },
+	{ ENTITY_oplus, L'⊕' },
+	{ ENTITY_or, L'∨' },
+	{ ENTITY_ordf, L'ª' },
+	{ ENTITY_ordm, L'º' },
+	{ ENTITY_oslash, L'ø' },
+	{ ENTITY_otilde, L'õ' },
+	{ ENTITY_otimes, L'⊗' },
+	{ ENTITY_ouml, L'ö' },
+	{ ENTITY_para, L'¶' },
+	{ ENTITY_part, L'∂' },
+	{ ENTITY_permil, L'‰' },
+	{ ENTITY_perp, L'⊥' },
+	{ ENTITY_phi, L'φ' },
+	{ ENTITY_pi, L'π' },
+	{ ENTITY_piv, L'ϖ' },
+	{ ENTITY_plusmn, L'±' },
+	{ ENTITY_pound, L'£' },
+	{ ENTITY_prime, L'′' },
+	{ ENTITY_prod, L'∏' },
+	{ ENTITY_prop, L'∝' },
+	{ ENTITY_psi, L'ψ' },
+	{ ENTITY_quot, L'\"' },
+	{ ENTITY_rArr, L'⇒' },
+	{ ENTITY_radic, L'√' },
+	{ ENTITY_rang, L'〉' },
+	{ ENTITY_raquo, L'»' },
+	{ ENTITY_rarr, L'→' },
+	{ ENTITY_rceil, L'⌉' },
+	{ ENTITY_rdquo, L'”' },
+	{ ENTITY_real, L'ℜ' },
+	{ ENTITY_reg, L'®' },
+	{ ENTITY_rfloor, L'⌋' },
+	{ ENTITY_rho, L'ρ' },
+	{ ENTITY_rlm, L'\u200F' },
+	{ ENTITY_rsaquo, L'›' },
+	{ ENTITY_rsquo, L'’' },
+	{ ENTITY_sbquo, L'‚' },
+	{ ENTITY_scaron, L'š' },
+	{ ENTITY_sdot, L'⋅' },
+	{ ENTITY_sect, L'§' },
+	{ ENTITY_shy, L'\u00AD' },
+	{ ENTITY_sigma, L'σ' },
+	{ ENTITY_sigmaf, L'ς' },
+	{ ENTITY_sim, L'∼' },
+	{ ENTITY_spades, L'♠' },
+	{ ENTITY_sub, L'⊂' },
+	{ ENTITY_sube, L'⊆' },
+	{ ENTITY_sum, L'∑' },
+	{ ENTITY_sup, L'⊃' },
+	{ ENTITY_sup1, L'¹' },
+	{ ENTITY_sup2, L'²' },
+	{ ENTITY_sup3, L'³' },
+	{ ENTITY_supe, L'⊇' },
+	{ ENTITY_szlig, L'ß' },
+	{ ENTITY_tau, L'τ' },
+	{ ENTITY_there4, L'∴' },
+	{ ENTITY_theta, L'θ' },
+	{ ENTITY_thetasym, L'ϑ' },
+	{ ENTITY_thinsp, L' ' },
+	{ ENTITY_thorn, L'þ' },
+	{ ENTITY_tilde, L'˜' },
+	{ ENTITY_times, L'×' },
+	{ ENTITY_trade, L'™' },
+	{ ENTITY_uArr, L'⇑' },
+	{ ENTITY_uacute, L'ú' },
+	{ ENTITY_uarr, L'↑' },
+	{ ENTITY_ucirc, L'û' },
+	{ ENTITY_ugrave, L'ù' },
+	{ ENTITY_uml, L'¨' },
+	{ ENTITY_upsih, L'ϒ' },
+	{ ENTITY_upsilon, L'υ' },
+	{ ENTITY_uuml, L'ü' },
+	{ ENTITY_weierp, L'℘' },
+	{ ENTITY_xi, L'ξ' },
+	{ ENTITY_yacute, L'ý' },
+	{ ENTITY_yen, L'¥' },
+	{ ENTITY_yuml, L'ÿ' },
+	{ ENTITY_zeta, L'ζ' },
+	{ ENTITY_zwj, L'\u200d' },
+	{ ENTITY_zwnj, L'\u200c' }
+};
+
+struct CSS_GLOBALS
+{
+	STREAM_BUILDER<ELEMENT_DISPLAY_STYLE, SERVICE_STACK, 100> defaultSyle;
+	STREAM_BUILDER<COLOR_INFO, SERVICE_STACK, 512> colorTable;
+	STREAM_BUILDER<FONT_SIZE_UNIT, SERVICE_STACK, 64> fontSizeTable;
+	CSS_STREAM documentStyle;
+};
+
+constexpr UINT8 PropertyWordSeparators[] = { PATTERN_FLAG_ONE_OR_MORE, CcStyleWordSeparators };
+constexpr UINT8 PropertyLineSeparators[] = { PATTERN_FLAG_ZERO_OR_MORE, CcWhitespace, ';' };
+constexpr UINT8 PropertyBlockSeparators[] = { PATTERN_FLAG_ZERO_OR_MORE, CcWhitespace, '}'};
+//
+//
+//template <typename STREAM>
+//auto parseWords(USTRING line, USTRING separators, STREAM&& wordStream)
+//{
+//	TSTRING_BUILDER separatorStream;
+//	USTRING lastSeparator = String.skipSeparators(line, separators, GetTempStream<16>());
+//
+//	while (auto matchText = String.splitChar(line, separators, separatorStream))
+//	{
+//		auto& word = wordStream.append(lastSeparator, matchText, separatorStream.toBuffer());
+//		lastSeparator = word.separatorAfter;
+//
+//		auto lastChar = word.separatorAfter.last();
+//		if (lastChar == '"' || lastChar == '\'')
+//		{
+//			auto& word = wordStream.append(NULL_STRING);
+//			word.separatorBefore = separatorStream.toBuffer();
+//
+//			auto quotedText = String.parseQuote(line, separators, separatorStream.clear(), lastChar);
+//			word.wordString = quotedText;
+//			word.wordName = FindName(quotedText);
+//
+//			word.separatorAfter = separatorStream.toBuffer();
+//			lastSeparator = word.separatorAfter;
+//		}
+//	}
+//
+//	return wordStream.toBuffer();
+//}
+
+extern CSS_GLOBALS& CssGlobals();
+extern void CssInitialize();
+extern void ParseCssProperty(CSS_STREAM& style, TOKEN name, PARSED_WORDS& paramStream);
